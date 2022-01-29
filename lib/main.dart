@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/screen/splash_screen/splash_screen.dart';
-
 import 'services/app_bindings/mybindings.dart';
 
 Future<void> main() async {

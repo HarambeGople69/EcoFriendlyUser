@@ -27,6 +27,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _email_controller = TextEditingController();
   TextEditingController _password_controller = TextEditingController();
+  final _email_node = FocusNode();
+  final _password_node = FocusNode();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -69,15 +71,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         const OurSizedBox(),
                         const OurSizedBox(),
                         CustomTextField(
+                          start: _email_node,
+                          end: _password_node,
                           icon: Icons.email,
                           controller: _email_controller,
                           validator: (value) {},
                           title: "Email",
                           type: TextInputType.emailAddress,
-                          number: 1,
+                          number: 0,
                         ),
                         const OurSizedBox(),
                         PasswordForm(
+                          start: _password_node,
                           controller: _password_controller,
                           title: "Password",
                           validator: (value) {},

@@ -166,7 +166,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _password_controller,
                         validator: (value) {},
                         title: "Password",
-                        number: 1,
+                        number: 0,
                       ),
                       const OurSizedBox(),
                       CustomTextField(
