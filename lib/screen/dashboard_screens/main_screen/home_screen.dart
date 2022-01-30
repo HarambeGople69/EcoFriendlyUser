@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:myapp/widgets/our_detail_product.dart';
 import 'package:myapp/widgets/our_shimmer_text.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
@@ -102,122 +104,128 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 4,
                   itemCount: items.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: ScreenUtil().setSp(10),
-                        vertical: ScreenUtil().setSp(5),
-                      ),
-                      color: logoColor.withOpacity(0.3),
-                      child: Stack(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: Image.asset(
-                                  items[index],
-                                  height: ScreenUtil().setSp(150),
-                                  width: ScreenUtil().setSp(150),
-                                  fit: BoxFit.fitWidth,
+                    return InkWell(
+                      onTap: () {
+                        Get.to(OurDetailProductScreen(imageUrl: items[index]),
+                            transition: Transition.rightToLeft);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ScreenUtil().setSp(10),
+                          vertical: ScreenUtil().setSp(5),
+                        ),
+                        color: logoColor.withOpacity(0.3),
+                        child: Stack(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Center(
+                                  child: Image.asset(
+                                    items[index],
+                                    height: ScreenUtil().setSp(150),
+                                    width: ScreenUtil().setSp(150),
+                                    fit: BoxFit.fitWidth,
+                                  ),
                                 ),
-                              ),
-                              const OurSizedBox(),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Name:",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: ScreenUtil().setSp(17.5),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: ScreenUtil().setSp(
-                                      15,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      "Item $index",
+                                const OurSizedBox(),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Name:",
                                       style: TextStyle(
-                                        fontSize: ScreenUtil().setSp(15),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: ScreenUtil().setSp(17.5),
                                       ),
                                     ),
-                                  )
-                                ],
-                              ),
-                              const OurSizedBox(),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Price:",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: ScreenUtil().setSp(17.5),
+                                    SizedBox(
+                                      width: ScreenUtil().setSp(
+                                        15,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: ScreenUtil().setSp(
-                                      15,
-                                    ),
-                                  ),
-                                  const Expanded(
-                                    child: Text(
-                                      "Rs 500",
-                                    ),
-                                  )
-                                ],
-                              ),
-                              const Spacer(),
-                              Center(
-                                child: RatingStars(
-                                  value: value,
-                                  onValueChanged: (v) {
-                                    setState(() {
-                                      value = v;
-                                    });
-                                  },
-                                  starBuilder: (index, color) => Icon(
-                                    Icons.star,
-                                    color: color,
-                                    size: ScreenUtil().setSp(17),
-                                  ),
-                                  starCount: 5,
-                                  starSize: ScreenUtil().setSp(17),
-                                  valueLabelColor: const Color(0xff9b9b9b),
-                                  valueLabelTextStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w400,
-                                    fontStyle: FontStyle.normal,
-                                    fontSize: ScreenUtil().setSp(12),
-                                  ),
-                                  valueLabelRadius: ScreenUtil().setSp(20),
-                                  maxValue: 5,
-                                  starSpacing: 1,
-                                  maxValueVisibility: true,
-                                  valueLabelVisibility: true,
-                                  animationDuration:
-                                      const Duration(milliseconds: 1000),
-                                  valueLabelPadding: EdgeInsets.symmetric(
-                                    vertical: ScreenUtil().setSp(5),
-                                    horizontal: ScreenUtil().setSp(5),
-                                  ),
-                                  valueLabelMargin: EdgeInsets.only(
-                                    right: ScreenUtil().setSp(3),
-                                  ),
-                                  starOffColor: const Color(0xffe7e8ea),
-                                  starColor: Colors.yellow,
+                                    Expanded(
+                                      child: Text(
+                                        "Item $index",
+                                        style: TextStyle(
+                                          fontSize: ScreenUtil().setSp(15),
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                const OurSizedBox(),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Price:",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: ScreenUtil().setSp(17.5),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: ScreenUtil().setSp(
+                                        15,
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Text(
+                                        "Rs 500",
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                const Spacer(),
+                                Center(
+                                  child: RatingStars(
+                                    value: value,
+                                    onValueChanged: (v) {
+                                      setState(() {
+                                        value = v;
+                                      });
+                                    },
+                                    starBuilder: (index, color) => Icon(
+                                      Icons.star,
+                                      color: color,
+                                      size: ScreenUtil().setSp(17),
+                                    ),
+                                    starCount: 5,
+                                    starSize: ScreenUtil().setSp(17),
+                                    valueLabelColor: const Color(0xff9b9b9b),
+                                    valueLabelTextStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w400,
+                                      fontStyle: FontStyle.normal,
+                                      fontSize: ScreenUtil().setSp(12),
+                                    ),
+                                    valueLabelRadius: ScreenUtil().setSp(20),
+                                    maxValue: 5,
+                                    starSpacing: 1,
+                                    maxValueVisibility: true,
+                                    valueLabelVisibility: true,
+                                    animationDuration:
+                                        const Duration(milliseconds: 1000),
+                                    valueLabelPadding: EdgeInsets.symmetric(
+                                      vertical: ScreenUtil().setSp(5),
+                                      horizontal: ScreenUtil().setSp(5),
+                                    ),
+                                    valueLabelMargin: EdgeInsets.only(
+                                      right: ScreenUtil().setSp(3),
+                                    ),
+                                    starOffColor: const Color(0xffe7e8ea),
+                                    starColor: Colors.yellow,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

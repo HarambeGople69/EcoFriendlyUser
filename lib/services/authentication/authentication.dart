@@ -8,6 +8,7 @@ import 'package:myapp/controller/authentication_controller.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/model/user_model.dart';
 import 'package:myapp/screen/authentication_screen/login_screen.dart';
+import 'package:myapp/screen/dashboard_screens/dashboard_screen.dart';
 import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
 import 'package:myapp/services/addImages/profile_image..dart';
 import 'package:myapp/services/firestore/firestore.dart';
@@ -50,7 +51,7 @@ class Auth {
 
         OurToast().showSuccessToast("User signed successfully");
         Get.off(
-          HomeScreen(),
+          DashBoardScreen(),
         );
 
         Hive.box<int>(authenticationDB).put("state", 1);
@@ -67,7 +68,9 @@ class Auth {
       await FirebaseAuth.instance.signOut().then((value) {
         OurToast().showSuccessToast("User logged out successfully");
         Hive.box<int>(authenticationDB).put("state", 0);
-        Get.off(LoginScreen(), );
+        Get.off(
+          LoginScreen(),
+        );
         Get.find<AuthenticationController>().toggle(false);
       });
     } on FirebaseAuthException catch (e) {
