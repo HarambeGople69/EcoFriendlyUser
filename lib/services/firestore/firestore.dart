@@ -12,6 +12,7 @@ import 'package:myapp/model/user_model.dart';
 import 'package:myapp/screen/dashboard_screens/dashboard_screen.dart';
 import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
 import 'package:myapp/widgets/our_flutter_toast.dart';
+import 'package:uuid/uuid.dart';
 
 class Firestore {
   addUser(UserModel userModel, String url) async {
@@ -22,12 +23,12 @@ class Firestore {
           .set({
         "uid": FirebaseAuth.instance.currentUser!.uid,
         "email": userModel.email,
-        "name": userModel.location,
+        "name": userModel.name,
         "AddedOn": DateFormat('yyy-MM-dd').format(
           DateTime.now(),
         ),
         "password": userModel.password,
-        "imageUrl": "",
+        "imageUrl": url,
         "phone": userModel.phone,
         "location": userModel.location,
       }).then((value) {
@@ -40,6 +41,28 @@ class Firestore {
       print(e);
       OurToast().showErrorToast(e.toString());
       Get.find<AuthenticationController>().toggle(false);
+    }
+  }
+
+  addProduct(String name, String desc, double price, String url) async {
+    String uid = Uuid().v4();
+    try {
+      await FirebaseFirestore.instance.collection("Products").doc(uid).set({
+        "uid": uid,
+        "name": name,
+        "desc": desc,
+        "price": price,
+        "rating": 0.0,
+        "url": url,
+        "addedOn": DateFormat('yyy-MM-dd').format(
+          DateTime.now(),
+        ),
+        "timestamp": Timestamp.now()
+      }).then((value) {
+        OurToast().showSuccessToast("Product added");
+      });
+    } catch (e) {
+      OurToast().showErrorToast(e.toString());
     }
   }
 }
