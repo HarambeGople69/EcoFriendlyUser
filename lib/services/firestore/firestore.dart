@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controller/authentication_controller.dart';
 import 'package:myapp/db/db_helper.dart';
+import 'package:myapp/model/product_model.dart';
 
 import 'package:myapp/model/user_model.dart';
 import 'package:myapp/screen/dashboard_screens/dashboard_screen.dart';
@@ -57,12 +58,89 @@ class Firestore {
         "addedOn": DateFormat('yyy-MM-dd').format(
           DateTime.now(),
         ),
-        "timestamp": Timestamp.now()
+        "ratingUID": [],
+        "ratingNo": 0,
+        "timestamp": Timestamp.now(),
       }).then((value) {
         OurToast().showSuccessToast("Product added");
       });
     } catch (e) {
       OurToast().showErrorToast(e.toString());
     }
+  }
+
+  addReview(String review, String productId, String name) async {
+    String uid = Uuid().v4();
+    try {
+      await FirebaseFirestore.instance
+          .collection("Products")
+          .doc(productId)
+          .collection("Reviews")
+          .doc(uid)
+          .set({
+        "uid": uid,
+        "senderName": name,
+        "senderId": FirebaseAuth.instance.currentUser!.uid,
+        "review": review,
+        "timestamp": Timestamp.now(),
+      });
+    } catch (e) {
+      OurToast().showErrorToast(
+        e.toString(),
+      );
+    }
+  }
+
+  addRating(ProductModel product, double rating) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Rating")
+          .doc(product.uid)
+          .collection("Ratings")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .set({"rating": rating}).then(
+        (value) => print("Inside Add rating function done"),
+      );
+    } catch (e) {}
+  }
+
+  updateRatingNo(ProductModel product) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Products")
+          .doc(product.uid)
+          .update({
+        "ratingUID":
+            FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid]),
+        "ratingNo": product.ratingNo + 1,
+      }).then((value) => print("Inside UpdateRatingNo done"));
+    } catch (e) {}
+  }
+
+  updateProductRating(ProductModel product) async {
+    double finalRating = 0.0;
+    int totalNum = 0;
+    QuerySnapshot abc = await FirebaseFirestore.instance
+        .collection("Rating")
+        .doc(product.uid)
+        .collection("Ratings")
+        .get();
+
+    abc.docs.forEach((element) {
+      finalRating = finalRating + element["rating"];
+    });
+
+    var b = await FirebaseFirestore.instance
+        .collection("Products")
+        .doc(product.uid)
+        .get();
+    totalNum = b["ratingNo"];
+    try {
+      await FirebaseFirestore.instance
+          .collection("Products")
+          .doc(product.uid)
+          .update({"rating": finalRating / totalNum}).then(
+              (value) => print("Inside UpdateRatingNo done"));
+    } catch (e) {}
   }
 }

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -123,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onTap: () {
                                   Get.to(
                                       OurDetailProductScreen(
-                                          imageUrl: items[index]),
+                                        productModel: productModel,
+                                      ),
                                       transition: Transition.rightToLeft);
                                 },
                                 child: Container(
@@ -139,11 +141,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Center(
-                                            child: Image.network(
-                                              productModel.url,
+                                            child: CachedNetworkImage(
                                               height: ScreenUtil().setSp(150),
                                               width: ScreenUtil().setSp(150),
                                               fit: BoxFit.fitWidth,
+                                              imageUrl: productModel.url,
+                                              placeholder: (context, url) =>
+                                                  Image.asset(
+                                                "assets/images/placeholder.png",
+                                                height: ScreenUtil().setSp(150),
+                                                width: ScreenUtil().setSp(150),
+                                              ),
                                             ),
                                           ),
                                           const OurSizedBox(),

@@ -11,8 +11,11 @@ class ProductModel {
   final String addedOn;
   final String url;
   final Timestamp timestamp;
+  final List ratingUID;
+  final int ratingNo;
 
   ProductModel({
+    required this.ratingNo,
     required this.uid,
     required this.name,
     required this.desc,
@@ -21,6 +24,7 @@ class ProductModel {
     required this.addedOn,
     required this.url,
     required this.timestamp,
+    required this.ratingUID,
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +37,8 @@ class ProductModel {
       'addedOn': addedOn,
       'url': url,
       'timestamp': timestamp,
+      'ratingUID': ratingUID,
+      'ratingNo': ratingNo,
     };
   }
 
@@ -46,6 +52,8 @@ class ProductModel {
       addedOn: map['addedOn'] ?? '',
       url: map['url'] ?? '',
       timestamp: map['timestamp'] ?? '',
+      ratingUID: map['ratingUID'] ?? [],
+      ratingNo: map['ratingNo'],
     );
   }
 }
