@@ -8,7 +8,7 @@ import 'package:myapp/controller/authentication_controller.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/model/user_model.dart';
 import 'package:myapp/screen/authentication_screen/login_screen.dart';
-import 'package:myapp/screen/main_screen/home_screen.dart';
+import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
 import 'package:myapp/services/addImages/profile_image..dart';
 import 'package:myapp/services/firestore/firestore.dart';
 import 'package:myapp/widgets/our_flutter_toast.dart';
@@ -67,7 +67,7 @@ class Auth {
       await FirebaseAuth.instance.signOut().then((value) {
         OurToast().showSuccessToast("User logged out successfully");
         Hive.box<int>(authenticationDB).put("state", 0);
-        Get.off(LoginScreen());
+        Get.off(LoginScreen(), );
         Get.find<AuthenticationController>().toggle(false);
       });
     } on FirebaseAuthException catch (e) {

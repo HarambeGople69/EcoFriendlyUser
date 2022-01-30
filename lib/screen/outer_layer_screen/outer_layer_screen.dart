@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/screen/authentication_screen/login_screen.dart';
-import 'package:myapp/screen/main_screen/home_screen.dart';
-
+import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
 
 class OuterLayerScreen extends StatefulWidget {
   const OuterLayerScreen({Key? key}) : super(key: key);

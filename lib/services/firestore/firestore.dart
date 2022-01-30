@@ -9,7 +9,7 @@ import 'package:myapp/controller/authentication_controller.dart';
 import 'package:myapp/db/db_helper.dart';
 
 import 'package:myapp/model/user_model.dart';
-import 'package:myapp/screen/main_screen/home_screen.dart';
+import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
 import 'package:myapp/widgets/our_flutter_toast.dart';
 
 class Firestore {
