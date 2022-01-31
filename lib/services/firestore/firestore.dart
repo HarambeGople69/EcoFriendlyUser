@@ -143,15 +143,30 @@ class Firestore {
     } catch (e) {}
   }
 
-  addItemToCart(FirebaseUserModel firebaseUserModel, String productId) async {
+  addItemToCart(
+      FirebaseUserModel firebaseUserModel, ProductModel product) async {
     try {
       await FirebaseFirestore.instance
           .collection("Users")
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .update({
-        "cartItems": FieldValue.arrayUnion([productId]),
+        "cartItems": FieldValue.arrayUnion([product.uid]),
         "cartItemNo": firebaseUserModel.cartItemNo + 1,
-      }).then((value) {
+      }).then((value) async {
+        await FirebaseFirestore.instance
+            .collection("Carts")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Products")
+            .doc(product.uid)
+            .set({
+          "uid": product.uid,
+          "name": product.name,
+          "desc": product.desc,
+          "url": product.url,
+          "price":product.price,
+          "addedOn": Timestamp.now(),
+          "quantity": 1,
+        });
         OurToast().showSuccessToast("Product Added to cart");
       });
     } catch (e) {
@@ -159,15 +174,22 @@ class Firestore {
     }
   }
 
-  removeItemFromCart(FirebaseUserModel firebaseUserModel, String productId) async {
+  removeItemFromCart(
+      FirebaseUserModel firebaseUserModel, ProductModel product) async {
     try {
       await FirebaseFirestore.instance
           .collection("Users")
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .update({
-        "cartItems": FieldValue.arrayRemove([productId]),
+        "cartItems": FieldValue.arrayRemove([product.uid]),
         "cartItemNo": firebaseUserModel.cartItemNo - 1,
-      }).then((value) {
+      }).then((value) async {
+        await FirebaseFirestore.instance
+            .collection("Carts")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Products")
+            .doc(product.uid)
+            .delete();
         OurToast().showSuccessToast("Product removed from cart");
       });
     } catch (e) {

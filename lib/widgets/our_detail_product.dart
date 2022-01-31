@@ -582,10 +582,6 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
                 builder: (BuildContext context,
                     AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
                         snapshot) {
-                  // return OurElevatedButton(
-                  //   title: "Add to Cart",
-                  //   function: () {},
-                  // );
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return CircularProgressIndicator();
                   } else if (snapshot.hasData) {
@@ -597,29 +593,22 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
                         return OurElevatedButton(
                           title: "Remove from cart",
                           function: () async {
-                            // Get.find<AuthenticationController>().toggle(true);
                             await Firestore().removeItemFromCart(
-                                firebaseUserModel, widget.productModelUID.uid);
-                            // Get.find<AuthenticationController>().toggle(false);
+                                firebaseUserModel, widget.productModelUID);
                           },
                         );
                       } else {
                         return OurElevatedButton(
                           title: "Add to cart",
                           function: () async {
-                            // Get.find<AuthenticationController>().toggle(true);
-
                             await Firestore().addItemToCart(
-                                firebaseUserModel, widget.productModelUID.uid);
-                            // Get.find<AuthenticationController>().toggle(false);
+                                firebaseUserModel, widget.productModelUID);
                           },
                         );
                       }
-                    } else {
-                      Text("No Data");
                     }
                   }
-                  return Text("data");
+                  return const Text("data");
                 },
               ),
             ),
@@ -629,7 +618,3 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
     );
   }
 }
-
-
-// Column(
-//                
