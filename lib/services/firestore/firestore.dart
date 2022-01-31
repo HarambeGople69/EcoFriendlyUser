@@ -1,17 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controller/authentication_controller.dart';
 import 'package:myapp/db/db_helper.dart';
+import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/model/product_model.dart';
-
 import 'package:myapp/model/user_model.dart';
 import 'package:myapp/screen/dashboard_screens/dashboard_screen.dart';
-import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
 import 'package:myapp/widgets/our_flutter_toast.dart';
 import 'package:uuid/uuid.dart';
 
@@ -32,11 +29,13 @@ class Firestore {
         "imageUrl": url,
         "phone": userModel.phone,
         "location": userModel.location,
+        "cartItems": [],
+        "cartItemNo": 0,
       }).then((value) {
         print("Done ==========================");
         Get.find<AuthenticationController>().toggle(false);
         Hive.box<int>(authenticationDB).put("state", 1);
-        Get.off(DashBoardScreen());
+        Get.off(const DashBoardScreen());
       });
     } catch (e) {
       print(e);
@@ -46,7 +45,7 @@ class Firestore {
   }
 
   addProduct(String name, String desc, double price, String url) async {
-    String uid = Uuid().v4();
+    String uid = const Uuid().v4();
     try {
       await FirebaseFirestore.instance.collection("Products").doc(uid).set({
         "uid": uid,
@@ -70,7 +69,7 @@ class Firestore {
   }
 
   addReview(String review, String productId, String name) async {
-    String uid = Uuid().v4();
+    String uid = const Uuid().v4();
     try {
       await FirebaseFirestore.instance
           .collection("Products")
@@ -142,5 +141,37 @@ class Firestore {
           .update({"rating": finalRating / totalNum}).then(
               (value) => print("Inside UpdateRatingNo done"));
     } catch (e) {}
+  }
+
+  addItemToCart(FirebaseUserModel firebaseUserModel, String productId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
+        "cartItems": FieldValue.arrayUnion([productId]),
+        "cartItemNo": firebaseUserModel.cartItemNo + 1,
+      }).then((value) {
+        OurToast().showSuccessToast("Product Added to cart");
+      });
+    } catch (e) {
+      OurToast().showErrorToast(e.toString());
+    }
+  }
+
+  removeItemFromCart(FirebaseUserModel firebaseUserModel, String productId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
+        "cartItems": FieldValue.arrayRemove([productId]),
+        "cartItemNo": firebaseUserModel.cartItemNo - 1,
+      }).then((value) {
+        OurToast().showSuccessToast("Product removed from cart");
+      });
+    } catch (e) {
+      OurToast().showErrorToast(e.toString());
+    }
   }
 }

@@ -30,10 +30,10 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   }
 
   List screens = [
-    HomeScreen(),
-    ChatScreen(),
-    OrderScreen(),
-    AddProductScreen()
+    const HomeScreen(),
+    const ChatScreen(),
+    const OrderScreen(),
+    const AddProductScreen()
   ];
 
   @override
@@ -48,21 +48,21 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 Get.find<DashboardController>().changeIndexs(index),
             items: [
               BottomNavyBarItem(
-                icon: Icon(Icons.apps),
-                title: Text('Home'),
+                icon: const Icon(Icons.apps),
+                title: const Text('Home'),
                 activeColor: Colors.red,
               ),
               BottomNavyBarItem(
-                  icon: Icon(Icons.people),
-                  title: Text('Users'),
+                  icon: const Icon(Icons.people),
+                  title: const Text('Users'),
                   activeColor: Colors.purpleAccent),
               BottomNavyBarItem(
-                  icon: Icon(Icons.message),
-                  title: Text('Messages'),
+                  icon: const Icon(Icons.message),
+                  title: const Text('Messages'),
                   activeColor: Colors.pink),
               BottomNavyBarItem(
-                  icon: Icon(Icons.settings),
-                  title: Text('Settings'),
+                  icon: const Icon(Icons.settings),
+                  title: const Text('Settings'),
                   activeColor: Colors.blue),
             ],
           ));

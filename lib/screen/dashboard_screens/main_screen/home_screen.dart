@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onTap: () {
                                   Get.to(
                                       OurDetailProductScreen(
-                                        productModel: productModel,
+                                        productModelUID: productModel,
                                       ),
                                       transition: Transition.rightToLeft);
                                 },
@@ -181,6 +181,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     fontSize:
                                                         ScreenUtil().setSp(15),
                                                   ),
+                                                  softWrap: true,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               )
                                             ],
@@ -206,8 +209,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                               ),
                                               Expanded(
-                                                child: Text(productModel.price
-                                                    .toString()),
+                                                child: Text(
+                                                  productModel.price.toString(),
+                                                  softWrap: true,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
                                               )
                                             ],
                                           ),

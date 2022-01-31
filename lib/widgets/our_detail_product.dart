@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:myapp/controller/authentication_controller.dart';
+import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/model/product_model.dart';
 import 'package:myapp/model/review_model.dart';
 import 'package:myapp/services/firestore/firestore.dart';
@@ -21,10 +22,10 @@ import 'package:myapp/widgets/our_text_field.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class OurDetailProductScreen extends StatefulWidget {
-  final ProductModel productModel;
+  final ProductModel productModelUID;
   const OurDetailProductScreen({
     Key? key,
-    required this.productModel,
+    required this.productModelUID,
   }) : super(key: key);
 
   @override
@@ -57,7 +58,7 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
                   child: StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection("Products")
-                        .doc(widget.productModel.uid)
+                        .doc(widget.productModelUID.uid)
                         .collection("Reviews")
                         .orderBy(
                           "timestamp",
@@ -79,7 +80,7 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
                                             .instance.currentUser!.uid) {
                                       await FirebaseFirestore.instance
                                           .collection("Products")
-                                          .doc(widget.productModel.uid)
+                                          .doc(widget.productModelUID.uid)
                                           .collection("Reviews")
                                           .doc(reviewModel.uid)
                                           .delete();
@@ -151,46 +152,51 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
                     },
                   ),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        icon: Icons.reviews,
-                        controller: _review_Controller,
-                        validator: (value) {},
-                        title: "Give Review",
-                        type: TextInputType.name,
-                        number: 1,
+                Padding(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(
+                          icon: Icons.reviews,
+                          controller: _review_Controller,
+                          validator: (value) {},
+                          title: "Give Review",
+                          type: TextInputType.name,
+                          number: 1,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        if (_review_Controller.text.trim().isNotEmpty) {
-                          Get.find<AuthenticationController>().toggle(true);
-                          var data = await FirebaseFirestore.instance
-                              .collection("Users")
-                              .doc(FirebaseAuth.instance.currentUser!.uid)
-                              .get();
+                      IconButton(
+                        onPressed: () async {
+                          if (_review_Controller.text.trim().isNotEmpty) {
+                            Get.find<AuthenticationController>().toggle(true);
+                            var data = await FirebaseFirestore.instance
+                                .collection("Users")
+                                .doc(FirebaseAuth.instance.currentUser!.uid)
+                                .get();
 
-                          var name = data.data()!["name"];
-                          await Firestore().addReview(
-                            _review_Controller.text.trim(),
-                            widget.productModel.uid,
-                            name,
-                          );
-                          _review_Controller.clear();
-                          Get.find<AuthenticationController>().toggle(false);
-                        } else {
-                          OurToast().showErrorToast("Review can't be empty");
-                        }
-                      },
-                      icon: Icon(
-                        Icons.send,
-                        color: logoColor,
-                        size: ScreenUtil().setSp(30),
+                            var name = data.data()!["name"];
+                            await Firestore().addReview(
+                              _review_Controller.text.trim(),
+                              widget.productModelUID.uid,
+                              name,
+                            );
+                            _review_Controller.clear();
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            Get.find<AuthenticationController>().toggle(false);
+                          } else {
+                            OurToast().showErrorToast("Review can't be empty");
+                          }
+                        },
+                        icon: Icon(
+                          Icons.send,
+                          color: logoColor,
+                          size: ScreenUtil().setSp(30),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 )
               ],
             ),
@@ -201,7 +207,7 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
   Future<void> _showMyDialog(double rate, bool exists) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
@@ -255,12 +261,13 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
                 OurElevatedButton(
                     title: "Submit",
                     function: () async {
-                      await Firestore().addRating(widget.productModel, rate);
+                      await Firestore().addRating(widget.productModelUID, rate);
                       if (!exists) {
-                        await Firestore().updateRatingNo(widget.productModel);
+                        await Firestore()
+                            .updateRatingNo(widget.productModelUID);
                       }
                       await Firestore()
-                          .updateProductRating(widget.productModel);
+                          .updateProductRating(widget.productModelUID);
                       Navigator.pop(context);
                     }),
               ],
@@ -292,250 +299,273 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
           inAsyncCall: Get.find<AuthenticationController>().processing.value,
           child: Scaffold(
             body: SafeArea(
-              child: Container(
-                // margin: EdgeInsets.symmetric(
-                //   horizontal: ScreenUtil().setSp(10),
-                //   vertical: ScreenUtil().setSp(10),
-                // ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        children: [
-                          Container(
-                            color: Colors.grey.withOpacity(0.3),
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * 0.3,
-                            child: Container(
-                              height: MediaQuery.of(context).size.height * 0.2,
-                              width: MediaQuery.of(context).size.width * 0.7,
-                              child: CachedNetworkImage(
-                                height: ScreenUtil().setSp(150),
-                                width: ScreenUtil().setSp(150),
-                                fit: BoxFit.fitWidth,
-                                imageUrl: widget.productModel.url,
-                                placeholder: (context, url) => Image.asset(
-                                  "assets/images/placeholder.png",
-                                  height: ScreenUtil().setSp(150),
-                                  width: ScreenUtil().setSp(150),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            margin: EdgeInsets.symmetric(
-                              horizontal: ScreenUtil().setSp(10),
-                              vertical: ScreenUtil().setSp(10),
-                            ),
-                            height: ScreenUtil().setSp(40),
-                            width: ScreenUtil().setSp(40),
-                            decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                shape: BoxShape.circle),
-                            child: IconButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              icon: Icon(
-                                Icons.arrow_back,
-                                size: ScreenUtil().setSp(25),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const OurSizedBox(),
-                      Container(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: ScreenUtil().setSp(20),
-                          vertical: ScreenUtil().setSp(10),
-                        ),
-                        child: Column(
+              child: SingleChildScrollView(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection("Products")
+                      .where("uid", isEqualTo: widget.productModelUID.uid)
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasData) {
+                      if (snapshot.data!.docs.length > 0) {
+                        ProductModel productModel =
+                            ProductModel.fromMap(snapshot.data!.docs[0]);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Stack(
                               children: [
-                                Text(
-                                  "Name:",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ScreenUtil().setSp(20),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: ScreenUtil().setSp(17.5),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    widget.productModel.name,
-                                    style: TextStyle(
-                                      fontSize: ScreenUtil().setSp(17.5),
+                                Container(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  width: MediaQuery.of(context).size.width,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.3,
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.2,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.7,
+                                    child: CachedNetworkImage(
+                                      height: ScreenUtil().setSp(150),
+                                      width: ScreenUtil().setSp(150),
+                                      fit: BoxFit.fitWidth,
+                                      imageUrl: productModel.url,
+                                      placeholder: (context, url) =>
+                                          Image.asset(
+                                        "assets/images/placeholder.png",
+                                        height: ScreenUtil().setSp(150),
+                                        width: ScreenUtil().setSp(150),
+                                      ),
                                     ),
                                   ),
-                                )
+                                ),
+                                Container(
+                                  margin: EdgeInsets.symmetric(
+                                    horizontal: ScreenUtil().setSp(10),
+                                    vertical: ScreenUtil().setSp(10),
+                                  ),
+                                  height: ScreenUtil().setSp(40),
+                                  width: ScreenUtil().setSp(40),
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      shape: BoxShape.circle),
+                                  child: IconButton(
+                                    onPressed: () {
+                                      Get.back();
+                                    },
+                                    icon: Icon(
+                                      Icons.arrow_back,
+                                      size: ScreenUtil().setSp(25),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                             const OurSizedBox(),
-                            const Divider(),
-                            const OurSizedBox(),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Description:",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ScreenUtil().setSp(20),
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                horizontal: ScreenUtil().setSp(20),
+                                vertical: ScreenUtil().setSp(10),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Name:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: ScreenUtil().setSp(20),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: ScreenUtil().setSp(17.5),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          productModel.name,
+                                          style: TextStyle(
+                                            fontSize: ScreenUtil().setSp(17.5),
+                                          ),
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                ),
-                                SizedBox(
-                                  width: ScreenUtil().setSp(17.5),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    widget.productModel.desc,
-                                    style: TextStyle(
-                                      fontSize: ScreenUtil().setSp(17.5),
-                                    ),
+                                  const OurSizedBox(),
+                                  const Divider(),
+                                  const OurSizedBox(),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Description:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: ScreenUtil().setSp(20),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: ScreenUtil().setSp(17.5),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          productModel.desc,
+                                          style: TextStyle(
+                                            fontSize: ScreenUtil().setSp(17.5),
+                                          ),
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                )
-                              ],
-                            ),
-                            const OurSizedBox(),
-                            const Divider(),
-                            const OurSizedBox(),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Price:",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ScreenUtil().setSp(20),
+                                  const OurSizedBox(),
+                                  const Divider(),
+                                  const OurSizedBox(),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Price:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: ScreenUtil().setSp(20),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: ScreenUtil().setSp(17.5),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          "Rs. ${productModel.price.toString()}",
+                                          style: TextStyle(
+                                            fontSize: ScreenUtil().setSp(17.5),
+                                          ),
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                ),
-                                SizedBox(
-                                  width: ScreenUtil().setSp(17.5),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    widget.productModel.price.toString(),
-                                    style: TextStyle(
-                                      fontSize: ScreenUtil().setSp(17.5),
-                                    ),
+                                  const OurSizedBox(),
+                                  const Divider(),
+                                  const OurSizedBox(),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Rating:",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: ScreenUtil().setSp(20),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: ScreenUtil().setSp(17.5),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          productModel.rating.toString(),
+                                          style: TextStyle(
+                                            fontSize: ScreenUtil().setSp(17.5),
+                                          ),
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                )
-                              ],
-                            ),
-                            const OurSizedBox(),
-                            const Divider(),
-                            const OurSizedBox(),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Rating:",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: ScreenUtil().setSp(20),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: ScreenUtil().setSp(17.5),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    widget.productModel.rating.toString(),
-                                    style: TextStyle(
-                                      fontSize: ScreenUtil().setSp(17.5),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            const OurSizedBox(),
-                            const Divider(),
-                            const OurSizedBox(),
-                            Row(
-                              children: [
-                                RatingStars(
-                                  value: widget.productModel.rating.toDouble(),
-                                  starBuilder: (index, color) => Icon(
-                                    Icons.star,
-                                    color: color,
-                                    size: ScreenUtil().setSp(20),
-                                  ),
-                                  starCount: 5,
-                                  starSize: ScreenUtil().setSp(17),
-                                  valueLabelColor: const Color(0xff9b9b9b),
-                                  valueLabelTextStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w400,
-                                    fontStyle: FontStyle.normal,
-                                    fontSize: ScreenUtil().setSp(17),
-                                  ),
-                                  valueLabelRadius: ScreenUtil().setSp(20),
-                                  maxValue: 5,
-                                  starSpacing: 1,
-                                  maxValueVisibility: true,
-                                  valueLabelVisibility: true,
-                                  animationDuration:
-                                      const Duration(milliseconds: 1000),
-                                  valueLabelPadding: EdgeInsets.symmetric(
-                                    vertical: ScreenUtil().setSp(5),
-                                    horizontal: ScreenUtil().setSp(5),
-                                  ),
-                                  valueLabelMargin: EdgeInsets.only(
-                                    right: ScreenUtil().setSp(3),
-                                  ),
-                                  starOffColor: const Color(0xffe7e8ea),
-                                  starColor: Colors.yellow,
-                                ),
-                                const Spacer(),
-                                OurElevatedButton(
-                                  title: "Give Rating",
-                                  function: () async {
-                                    if (widget.productModel.ratingUID.contains(
-                                        FirebaseAuth
-                                            .instance.currentUser!.uid)) {
-                                      var a = await FirebaseFirestore.instance
-                                          .collection("Rating")
-                                          .doc(widget.productModel.uid)
-                                          .collection("Ratings")
-                                          .doc(FirebaseAuth
-                                              .instance.currentUser!.uid)
-                                          .get();
+                                  const OurSizedBox(),
+                                  const Divider(),
+                                  const OurSizedBox(),
+                                  Row(
+                                    children: [
+                                      RatingStars(
+                                        value: productModel.rating.toDouble(),
+                                        starBuilder: (index, color) => Icon(
+                                          Icons.star,
+                                          color: color,
+                                          size: ScreenUtil().setSp(20),
+                                        ),
+                                        starCount: 5,
+                                        starSize: ScreenUtil().setSp(17),
+                                        valueLabelColor:
+                                            const Color(0xff9b9b9b),
+                                        valueLabelTextStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.normal,
+                                          fontSize: ScreenUtil().setSp(17),
+                                        ),
+                                        valueLabelRadius:
+                                            ScreenUtil().setSp(20),
+                                        maxValue: 5,
+                                        starSpacing: 1,
+                                        maxValueVisibility: true,
+                                        valueLabelVisibility: true,
+                                        animationDuration:
+                                            const Duration(milliseconds: 1000),
+                                        valueLabelPadding: EdgeInsets.symmetric(
+                                          vertical: ScreenUtil().setSp(5),
+                                          horizontal: ScreenUtil().setSp(5),
+                                        ),
+                                        valueLabelMargin: EdgeInsets.only(
+                                          right: ScreenUtil().setSp(3),
+                                        ),
+                                        starOffColor: const Color(0xffe7e8ea),
+                                        starColor: Colors.yellow,
+                                      ),
+                                      const Spacer(),
+                                      OurElevatedButton(
+                                        title: "Give Rating",
+                                        function: () async {
+                                          if (productModel.ratingUID.contains(
+                                              FirebaseAuth
+                                                  .instance.currentUser!.uid)) {
+                                            var a = await FirebaseFirestore
+                                                .instance
+                                                .collection("Rating")
+                                                .doc(productModel.uid)
+                                                .collection("Ratings")
+                                                .doc(FirebaseAuth
+                                                    .instance.currentUser!.uid)
+                                                .get();
 
-                                      var rate = a.data()!["rating"];
-                                      _showMyDialog(rate, true);
+                                            var rate = a.data()!["rating"];
+                                            _showMyDialog(rate, true);
 
-                                      OurToast()
-                                          .showSuccessToast("UID Contains");
-                                    } else {
-                                      OurToast().showErrorToast(
-                                          "UID Doesn't contains");
-                                      _showMyDialog(0.0, false);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                            const OurSizedBox(),
-                            const Divider(),
-                            const OurSizedBox(),
-                            OurElevatedButton(
-                              title: "Give Review",
-                              function: () {
-                                GiveRatingSheet(context);
-                              },
-                            ),
+                                            OurToast().showSuccessToast(
+                                                "UID Contains");
+                                          } else {
+                                            OurToast().showErrorToast(
+                                                "UID Doesn't contains");
+                                            _showMyDialog(0.0, false);
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  const OurSizedBox(),
+                                  const Divider(),
+                                  const OurSizedBox(),
+                                  OurElevatedButton(
+                                    title: "Give Review",
+                                    function: () {
+                                      GiveRatingSheet(context);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            )
                           ],
-                        ),
-                      )
-                    ],
-                  ),
+                        );
+                      } else {}
+                    }
+                    return Text("data");
+                  },
                 ),
               ),
             ),
@@ -544,9 +574,53 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
                 horizontal: ScreenUtil().setSp(20),
                 vertical: ScreenUtil().setSp(10),
               ),
-              child: OurElevatedButton(
-                title: "Add to Cart",
-                function: () {},
+              child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection("Users")
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                        snapshot) {
+                  // return OurElevatedButton(
+                  //   title: "Add to Cart",
+                  //   function: () {},
+                  // );
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasData) {
+                    if (snapshot.data!.exists) {
+                      FirebaseUserModel firebaseUserModel =
+                          FirebaseUserModel.fromMap(snapshot.data!.data()!);
+                      if (firebaseUserModel.cartItems
+                          .contains(widget.productModelUID.uid)) {
+                        return OurElevatedButton(
+                          title: "Remove from cart",
+                          function: () async {
+                            // Get.find<AuthenticationController>().toggle(true);
+                            await Firestore().removeItemFromCart(
+                                firebaseUserModel, widget.productModelUID.uid);
+                            // Get.find<AuthenticationController>().toggle(false);
+                          },
+                        );
+                      } else {
+                        return OurElevatedButton(
+                          title: "Add to cart",
+                          function: () async {
+                            // Get.find<AuthenticationController>().toggle(true);
+
+                            await Firestore().addItemToCart(
+                                firebaseUserModel, widget.productModelUID.uid);
+                            // Get.find<AuthenticationController>().toggle(false);
+                          },
+                        );
+                      }
+                    } else {
+                      Text("No Data");
+                    }
+                  }
+                  return Text("data");
+                },
               ),
             ),
           ),
@@ -555,3 +629,7 @@ class _OurDetailProductScreenState extends State<OurDetailProductScreen> {
     );
   }
 }
+
+
+// Column(
+//                

@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
               data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
               child: widget!);
         },
-        home: SplashScreen(),
+        home: const SplashScreen(),
         useInheritedMediaQuery: true,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(brightness: Brightness.dark),
