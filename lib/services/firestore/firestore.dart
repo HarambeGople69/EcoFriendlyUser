@@ -32,7 +32,7 @@ class Firestore {
         "location": userModel.location,
         "cartItems": [],
         "cartItemNo": 0,
-        "currentCartPrice":0.0,
+        "currentCartPrice": 0.0,
       }).then((value) {
         print("Done ==========================");
         Get.find<AuthenticationController>().toggle(false);
@@ -154,6 +154,7 @@ class Firestore {
           .update({
         "cartItems": FieldValue.arrayUnion([product.uid]),
         "cartItemNo": firebaseUserModel.cartItemNo + 1,
+        "currentCartPrice": firebaseUserModel.currentCartPrice + product.price
       }).then((value) async {
         await FirebaseFirestore.instance
             .collection("Carts")
@@ -186,12 +187,27 @@ class Firestore {
         "cartItems": FieldValue.arrayRemove([product.uid]),
         "cartItemNo": firebaseUserModel.cartItemNo - 1,
       }).then((value) async {
+        var abc = await FirebaseFirestore.instance
+            .collection("Carts")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Products")
+            .doc(product.uid)
+            .get();
+        CartProductModel cartProductModel = CartProductModel.fromMap(abc);
+        await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({
+          "currentCartPrice": firebaseUserModel.currentCartPrice -
+              cartProductModel.price * cartProductModel.quantity,
+        });
         await FirebaseFirestore.instance
             .collection("Carts")
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection("Products")
             .doc(product.uid)
             .delete();
+
         OurToast().showSuccessToast("Product removed from cart");
       });
     } catch (e) {
@@ -200,6 +216,7 @@ class Firestore {
   }
 
   increaseProductCount(CartProductModel cartProductModel) async {
+    double totalPrice = 0.0;
     await FirebaseFirestore.instance
         .collection("Carts")
         .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -207,10 +224,29 @@ class Firestore {
         .doc(cartProductModel.uid)
         .update({
       "quantity": cartProductModel.quantity + 1,
+    }).then((value) async {
+      var collection = await FirebaseFirestore.instance
+          .collection("Carts")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection("Products")
+          .get();
+      for (var doc in collection.docs) {
+        var abc = doc.data();
+        CartProductModel cartProductModel =
+            CartProductModel.toIncreaseorDecrease(doc.data());
+        totalPrice =
+            totalPrice + cartProductModel.price * cartProductModel.quantity;
+      }
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({"currentCartPrice": totalPrice});
     });
   }
 
   decreaseProductCount(CartProductModel cartProductModel) async {
+    double totalPrice = 0.0;
+
     await FirebaseFirestore.instance
         .collection("Carts")
         .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -218,6 +254,27 @@ class Firestore {
         .doc(cartProductModel.uid)
         .update({
       "quantity": cartProductModel.quantity - 1,
+    }).then((value) async {
+      var collection = await FirebaseFirestore.instance
+          .collection("Carts")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection("Products")
+          .get();
+      for (var doc in collection.docs) {
+        var abc = doc.data();
+        CartProductModel cartProductModel =
+            CartProductModel.toIncreaseorDecrease(doc.data());
+        totalPrice =
+            totalPrice + cartProductModel.price * cartProductModel.quantity;
+      }
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update(
+        {
+          "currentCartPrice": totalPrice,
+        },
+      );
     });
   }
 
@@ -242,6 +299,19 @@ class Firestore {
             .collection("Products")
             .doc(cartProductModel.uid)
             .delete();
+        var data = await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .get();
+
+        var currentCartPrice = data.data()!["currentCartPrice"];
+        await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({
+          "currentCartPrice": currentCartPrice -
+              cartProductModel.price * cartProductModel.quantity,
+        });
         OurToast().showSuccessToast("Product removed from cart");
       });
     } catch (e) {
@@ -270,6 +340,12 @@ class Firestore {
           // .collection("Carts")
           // .doc(FirebaseAuth.instance.currentUser!.uid).
         }
+        await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({
+          "currentCartPrice": 0.0,
+        });
         OurToast().showSuccessToast("Product removed from cart");
       });
     } catch (e) {

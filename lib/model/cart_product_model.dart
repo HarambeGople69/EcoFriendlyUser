@@ -44,4 +44,16 @@ class CartProductModel {
       quantity: map['quantity']?.toInt() ?? 0,
     );
   }
+
+   factory CartProductModel.toIncreaseorDecrease(Map<String,dynamic> map) {
+    return CartProductModel(
+      uid: map['uid'] ?? '',
+      name: map['name'] ?? '',
+      desc: map['desc'] ?? '',
+      url: map['url'] ?? '',
+      price: map['price']?.toDouble() ?? 0.0,
+      addedOn: map['addedOn'],
+      quantity: map['quantity']?.toInt() ?? 0,
+    );
+  }
 }
