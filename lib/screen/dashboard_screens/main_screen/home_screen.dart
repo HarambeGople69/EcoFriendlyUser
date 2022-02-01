@@ -6,10 +6,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/model/product_model.dart';
+import 'package:myapp/screen/dashboard_screens/cart_screen/cart_screen.dart';
+import 'package:myapp/screen/dashboard_screens/product_detail_screen/our_detail_product.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:myapp/widgets/our_detail_product.dart';
 import 'package:myapp/widgets/our_shimmer_text.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
@@ -34,23 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     "assets/images/7.png",
     "assets/images/8.png",
   ];
-
-// Badge(
-//               position: BadgePosition.topStart(),
-//               badgeContent: Text(
-//                 "1",
-//                 style: TextStyle(
-//                   fontSize: ScreenUtil().setSp(15),
-//                   fontWeight: FontWeight.w600,
-//                 ),
-//               ),
-//               child: Icon(
-//                 Icons.shopping_basket,
-//                 size: ScreenUtil().setSp(
-//                   25,
-//                 ),
-//               ),
-//             ),
 
   @override
   Widget build(BuildContext context) {
@@ -85,15 +69,38 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (snapshot.data!.exists) {
                     FirebaseUserModel firebaseUserModel =
                         FirebaseUserModel.fromMap(snapshot.data!.data()!);
-                    return Badge(
-                      position: BadgePosition.topStart(),
-                      badgeContent: Text(
-                        firebaseUserModel.cartItemNo.toString(),
-                        style: TextStyle(
-                          fontSize: ScreenUtil().setSp(15),
-                          fontWeight: FontWeight.w600,
+                    return InkWell(
+                      onTap: () {
+                        Get.to(
+                          CartScreen(),
+                          transition: Transition.rightToLeft,
+                        );
+                      },
+                      child: Badge(
+                        position: BadgePosition.topStart(),
+                        badgeContent: Text(
+                          firebaseUserModel.cartItemNo.toString(),
+                          style: TextStyle(
+                            fontSize: ScreenUtil().setSp(15),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.shopping_basket,
+                          size: ScreenUtil().setSp(
+                            25,
+                          ),
                         ),
                       ),
+                    );
+                  } else {
+                    return InkWell(
+                      onTap: () {
+                        Get.to(
+                          CartScreen(),
+                          transition: Transition.rightToLeft,
+                        );
+                      },
                       child: Icon(
                         Icons.shopping_basket,
                         size: ScreenUtil().setSp(
@@ -101,19 +108,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     );
-                  } else {
-                    return Icon(
-                      Icons.shopping_basket,
-                      size: ScreenUtil().setSp(
-                        25,
-                      ),
-                    );
                   }
                 }
-                return Icon(
-                  Icons.shopping_basket,
-                  size: ScreenUtil().setSp(
-                    25,
+                return InkWell(
+                  onTap: () {
+                    Get.to(
+                      CartScreen(),
+                      transition: Transition.rightToLeft,
+                    );
+                  },
+                  child: Icon(
+                    Icons.shopping_basket,
+                    size: ScreenUtil().setSp(
+                      25,
+                    ),
                   ),
                 );
               },

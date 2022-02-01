@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controller/authentication_controller.dart';
 import 'package:myapp/db/db_helper.dart';
+import 'package:myapp/model/cart_product_model.dart';
 import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/model/product_model.dart';
 import 'package:myapp/model/user_model.dart';
@@ -163,7 +164,7 @@ class Firestore {
           "name": product.name,
           "desc": product.desc,
           "url": product.url,
-          "price":product.price,
+          "price": product.price,
           "addedOn": Timestamp.now(),
           "quantity": 1,
         });
@@ -190,6 +191,84 @@ class Firestore {
             .collection("Products")
             .doc(product.uid)
             .delete();
+        OurToast().showSuccessToast("Product removed from cart");
+      });
+    } catch (e) {
+      OurToast().showErrorToast(e.toString());
+    }
+  }
+
+  increaseProductCount(CartProductModel cartProductModel) async {
+    await FirebaseFirestore.instance
+        .collection("Carts")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("Products")
+        .doc(cartProductModel.uid)
+        .update({
+      "quantity": cartProductModel.quantity + 1,
+    });
+  }
+
+  decreaseProductCount(CartProductModel cartProductModel) async {
+    await FirebaseFirestore.instance
+        .collection("Carts")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("Products")
+        .doc(cartProductModel.uid)
+        .update({
+      "quantity": cartProductModel.quantity - 1,
+    });
+  }
+
+  deleteItemFromCart(CartProductModel cartProductModel) async {
+    try {
+      var data = await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      var cartItemNo = data.data()!["cartItemNo"];
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
+        "cartItems": FieldValue.arrayRemove([cartProductModel.uid]),
+        "cartItemNo": cartItemNo - 1,
+      }).then((value) async {
+        await FirebaseFirestore.instance
+            .collection("Carts")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Products")
+            .doc(cartProductModel.uid)
+            .delete();
+        OurToast().showSuccessToast("Product removed from cart");
+      });
+    } catch (e) {
+      OurToast().showErrorToast(e.toString());
+    }
+  }
+
+  clearCart() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
+        "cartItems": [],
+        "cartItemNo": 0,
+      }).then((value) async {
+        var collection = await FirebaseFirestore.instance
+            .collection("Carts")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Products")
+            .get();
+
+        for (var doc in collection.docs) {
+          // FirebaseFirestore.instance.batch().delete(doc.reference);
+          await doc.reference.delete();
+          // .collection("Carts")
+          // .doc(FirebaseAuth.instance.currentUser!.uid).
+        }
         OurToast().showSuccessToast("Product removed from cart");
       });
     } catch (e) {
