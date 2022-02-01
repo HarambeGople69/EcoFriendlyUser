@@ -3,10 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:myapp/model/cart_product_model.dart';
+import 'package:myapp/screen/dashboard_screens/check_out_screen/check_out_screen.dart';
 import 'package:myapp/services/firestore/firestore.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/our_elevated_button.dart';
+import 'package:myapp/widgets/our_flutter_toast.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -256,7 +260,27 @@ class _CartScreenState extends State<CartScreen> {
             Expanded(
               child: OurElevatedButton(
                 title: "Check Out",
-                function: () {},
+                function: () async {
+                  var abc = await FirebaseFirestore.instance
+                      .collection("Users")
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .get();
+                  int def = abc.data()!["cartItemNo"];
+                  if (def == 0) {
+                    OurToast().showErrorToast("Oops, cart is empty");
+                  } else {
+                    Position newPosition = await Geolocator.getCurrentPosition(
+                        desiredAccuracy: LocationAccuracy.high);
+                    Get.to(
+                      CheckOutScreen(
+                        userPosition: newPosition,
+                      ),
+                      // LocationAppExample(),
+                      transition: Transition.rightToLeft,
+                    );
+                    OurToast().showSuccessToast("Cart has Item");
+                  }
+                },
               ),
             ),
           ],

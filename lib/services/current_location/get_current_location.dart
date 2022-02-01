@@ -13,8 +13,6 @@ class GetCurrentLocation {
     PermissionStatus _status = await Permission.location.request();
 
     if (_status.isPermanentlyDenied) {
-      print("===================");
-      // openAppSettings();
       AppSettings.openAppSettings();
     }
 

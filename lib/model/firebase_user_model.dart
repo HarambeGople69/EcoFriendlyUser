@@ -12,9 +12,11 @@ class FirebaseUserModel {
   final String phone;
   final String location;
   final int cartItemNo;
+  final double currentCartPrice;
   final List cartItems;
 
   FirebaseUserModel({
+    required this.currentCartPrice,
     required this.uid,
     required this.email,
     required this.name,
@@ -39,6 +41,7 @@ class FirebaseUserModel {
       'Location': location,
       'cartItem': cartItems,
       'cartItemNo': cartItemNo,
+      'currentCartPrice': currentCartPrice
     };
   }
 
@@ -54,6 +57,7 @@ class FirebaseUserModel {
       location: map['location'] ?? '',
       cartItems: List.from(map['cartItems']),
       cartItemNo: map['cartItemNo'] ?? 0,
+      currentCartPrice: map['currentCartPrice'] ?? 0.0,
     );
   }
 }

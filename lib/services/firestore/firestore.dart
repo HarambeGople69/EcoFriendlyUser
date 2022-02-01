@@ -32,6 +32,7 @@ class Firestore {
         "location": userModel.location,
         "cartItems": [],
         "cartItemNo": 0,
+        "currentCartPrice":0.0,
       }).then((value) {
         print("Done ==========================");
         Get.find<AuthenticationController>().toggle(false);
