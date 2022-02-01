@@ -6,11 +6,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:myapp/model/cart_product_model.dart';
+import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/screen/dashboard_screens/check_out_screen/check_out_screen.dart';
 import 'package:myapp/services/firestore/firestore.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/our_elevated_button.dart';
 import 'package:myapp/widgets/our_flutter_toast.dart';
+import 'package:myapp/widgets/our_shimmer_text.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -51,191 +53,240 @@ class _CartScreenState extends State<CartScreen> {
             horizontal: ScreenUtil().setSp(20),
             vertical: ScreenUtil().setSp(10),
           ),
-          child: SingleChildScrollView(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection("Carts")
-                  .doc(FirebaseAuth.instance.currentUser!.uid)
-                  .collection("Products")
-                  .orderBy(
-                    "addedOn",
-                    descending: true,
-                  )
-                  .snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasData) {
-                  if (snapshot.data!.docs.length > 0) {
-                    return ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          CartProductModel cartProductModel =
-                              CartProductModel.fromMap(
-                                  snapshot.data!.docs[index]);
-                          return Column(
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            children: [
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection("Carts")
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .collection("Products")
+                      .orderBy(
+                        "addedOn",
+                        descending: true,
+                      )
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: const CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasData) {
+                      if (snapshot.data!.docs.length > 0) {
+                        return ListView.builder(
+                            // shrinkWrap: true,
+                            // physics: NeverScrollableScrollPhysics(),
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (context, index) {
+                              CartProductModel cartProductModel =
+                                  CartProductModel.fromMap(
+                                      snapshot.data!.docs[index]);
+                              return Column(
                                 children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Center(
-                                          child: CachedNetworkImage(
-                                            height: ScreenUtil().setSp(150),
-                                            width: ScreenUtil().setSp(150),
-                                            fit: BoxFit.fitWidth,
-                                            imageUrl: cartProductModel.url,
-                                            placeholder: (context, url) =>
-                                                Image.asset(
-                                              "assets/images/placeholder.png",
-                                              height: ScreenUtil().setSp(150),
-                                              width: ScreenUtil().setSp(150),
-                                            ),
-                                          ),
-                                        ),
-                                        OurSizedBox(),
-                                        Row(
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              "Name:",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize:
-                                                    ScreenUtil().setSp(20),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: ScreenUtil().setSp(17.5),
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                cartProductModel.name,
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      ScreenUtil().setSp(17.5),
+                                            Center(
+                                              child: CachedNetworkImage(
+                                                height: ScreenUtil().setSp(150),
+                                                width: ScreenUtil().setSp(150),
+                                                fit: BoxFit.fitWidth,
+                                                imageUrl: cartProductModel.url,
+                                                placeholder: (context, url) =>
+                                                    Image.asset(
+                                                  "assets/images/placeholder.png",
+                                                  height:
+                                                      ScreenUtil().setSp(150),
+                                                  width:
+                                                      ScreenUtil().setSp(150),
                                                 ),
                                               ),
-                                            )
-                                          ],
-                                        ),
-                                        OurSizedBox(),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Price:",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize:
-                                                    ScreenUtil().setSp(20),
-                                              ),
                                             ),
-                                            SizedBox(
-                                              width: ScreenUtil().setSp(17.5),
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                "Rs. ${cartProductModel.price.toString()}",
-                                                style: TextStyle(
-                                                  fontSize:
+                                            const OurSizedBox(),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "Name:",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize:
+                                                        ScreenUtil().setSp(20),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width:
                                                       ScreenUtil().setSp(17.5),
                                                 ),
-                                              ),
-                                            )
+                                                Expanded(
+                                                  child: Text(
+                                                    cartProductModel.name,
+                                                    style: TextStyle(
+                                                      fontSize: ScreenUtil()
+                                                          .setSp(17.5),
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            const OurSizedBox(),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "Price:",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize:
+                                                        ScreenUtil().setSp(20),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                      ScreenUtil().setSp(17.5),
+                                                ),
+                                                Expanded(
+                                                  child: Text(
+                                                    "Rs. ${cartProductModel.price.toString()}",
+                                                    style: TextStyle(
+                                                      fontSize: ScreenUtil()
+                                                          .setSp(17.5),
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Row(
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                              MainAxisAlignment.spaceEvenly,
                                           children: [
-                                            IconButton(
-                                              color: logoColor,
-                                              onPressed: () async {
-                                                if (cartProductModel.quantity >
-                                                    1) {
-                                                  await Firestore()
-                                                      .decreaseProductCount(
-                                                          cartProductModel);
-                                                }
-                                              },
-                                              icon: Icon(
-                                                Icons.remove,
-                                                size: ScreenUtil().setSp(25),
-                                              ),
-                                            ),
-                                            Text(
-                                              cartProductModel.quantity
-                                                  .toString(),
-                                              style: TextStyle(
-                                                fontSize:
-                                                    ScreenUtil().setSp(20),
-                                              ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              children: [
+                                                IconButton(
+                                                  color: logoColor,
+                                                  onPressed: () async {
+                                                    if (cartProductModel
+                                                            .quantity >
+                                                        1) {
+                                                      await Firestore()
+                                                          .decreaseProductCount(
+                                                              cartProductModel);
+                                                    }
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.remove,
+                                                    size:
+                                                        ScreenUtil().setSp(25),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  cartProductModel.quantity
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                    fontSize:
+                                                        ScreenUtil().setSp(20),
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  onPressed: () async {
+                                                    await Firestore()
+                                                        .increaseProductCount(
+                                                            cartProductModel);
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.add,
+                                                    size:
+                                                        ScreenUtil().setSp(25),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                             IconButton(
                                               onPressed: () async {
                                                 await Firestore()
-                                                    .increaseProductCount(
+                                                    .deleteItemFromCart(
                                                         cartProductModel);
                                               },
                                               icon: Icon(
-                                                Icons.add,
-                                                size: ScreenUtil().setSp(25),
+                                                Icons.delete,
+                                                color: Colors.red,
+                                                size: ScreenUtil().setSp(
+                                                  25,
+                                                ),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            await Firestore()
-                                                .deleteItemFromCart(
-                                                    cartProductModel);
-                                          },
-                                          icon: Icon(
-                                            Icons.delete,
-                                            color: Colors.red,
-                                            size: ScreenUtil().setSp(
-                                              25,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
+                                  const OurSizedBox(),
+                                  const Divider(),
+                                  const OurSizedBox(),
                                 ],
+                              );
+                            });
+                      } else {
+                        return const Center(child: const Text("No Data"));
+                      }
+                    }
+                    return const Text("data");
+                  },
+                ),
+              ),
+              StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection("Users")
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                        snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasData) {
+                    if (snapshot.data!.exists) {
+                      FirebaseUserModel firebaseUserModel =
+                          FirebaseUserModel.fromMap(snapshot.data!.data()!);
+                      return Row(
+                        children: [
+                          const Expanded(
+                            child: OurShimmerText(title: "Total Price:"),
+                          ),
+                          Expanded(
+                            child: Text(
+                              firebaseUserModel.currentCartPrice.toString(),
+                              style: TextStyle(
+                                fontSize: ScreenUtil().setSp(20),
+                                fontWeight: FontWeight.w400,
                               ),
-                              OurSizedBox(),
-                              Divider(),
-                              OurSizedBox(),
-                            ],
-                          );
-                        });
-                  } else {
-                    return Text("No Data");
+                            ),
+                          )
+                        ],
+                      );
+                    }
                   }
-                }
-                return Text("data");
-              },
-            ),
+                  return const Text("data");
+                },
+              ),
+            ],
           ),
         ),
       ),
