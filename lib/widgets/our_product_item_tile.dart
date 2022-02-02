@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:myapp/model/product_model.dart';
 import 'package:myapp/screen/dashboard_screens/product_detail_screen/our_detail_product.dart';
+import 'package:myapp/services/firestore/firestore.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
 
@@ -45,10 +47,28 @@ class _OurProductItemTileState extends State<OurProductItemTile> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.favorite),
-                ),
+                widget.productModel.favorite
+                        .contains(FirebaseAuth.instance.currentUser!.uid)
+                    ? IconButton(
+                        onPressed: () async {
+                          await Firestore().removeFavorite(widget.productModel);
+                        },
+                        icon: Icon(
+                          Icons.favorite,
+                          size: ScreenUtil().setSp(30),
+                          color: Colors.red,
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: () async {
+                          await Firestore().addFavorite(widget.productModel);
+                        },
+                        icon: Icon(
+                          Icons.favorite_border_outlined,
+                          size: ScreenUtil().setSp(30),
+                          color: Colors.red,
+                        ),
+                      ),
                 Center(
                   child: CachedNetworkImage(
                     height: ScreenUtil().setSp(150),

@@ -1,7 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -9,14 +7,12 @@ import 'package:myapp/controller/search_text_controller.dart';
 import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/model/product_model.dart';
 import 'package:myapp/screen/dashboard_screens/cart_screen/cart_screen.dart';
-import 'package:myapp/screen/dashboard_screens/product_detail_screen/our_detail_product.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:myapp/widgets/our_product_item_tile.dart';
 import 'package:myapp/widgets/our_shimmer_text.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
-import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:badges/badges.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -166,11 +162,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: InputDecoration(
                   focusColor: logoColor,
                   border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: lightlogoColor,
+                    ),
                     borderRadius: BorderRadius.all(
                       Radius.circular(
                         ScreenUtil().setSp(10),
                       ),
                     ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: lightlogoColor,
+                    ),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(
+                        ScreenUtil().setSp(10),
+                      ),
+                    ),
+                  ),
+                  hintText: "Product Name",
+                  hintStyle: TextStyle(
+                    color: logoColor,
+                    fontSize: ScreenUtil().setSp(17.5),
                   ),
                   fillColor: Colors.white,
                   filled: true,
@@ -294,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 },
                                 staggeredTileBuilder: (int index) =>
                                     StaggeredTile.count(
-                                        2, index.isEven ? 3.35 : 3.5),
+                                        2, index.isEven ? 3.35 : 3.7),
                                 mainAxisSpacing: ScreenUtil().setSp(10),
                                 crossAxisSpacing: ScreenUtil().setSp(10),
                               );

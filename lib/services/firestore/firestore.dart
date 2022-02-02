@@ -31,6 +31,7 @@ class Firestore {
         "phone": userModel.phone,
         "location": userModel.location,
         "cartItems": [],
+        "favorite": [],
         "cartItemNo": 0,
         "currentCartPrice": 0.0,
       }).then((value) {
@@ -68,6 +69,7 @@ class Firestore {
         "ratingUID": [],
         "ratingNo": 0,
         "timestamp": Timestamp.now(),
+        "favorite": [],
         "searchfrom": searchList,
       }).then((value) {
         OurToast().showSuccessToast("Product added");
@@ -354,6 +356,56 @@ class Firestore {
           "currentCartPrice": 0.0,
         });
         OurToast().showSuccessToast("Product removed from cart");
+      });
+    } catch (e) {
+      OurToast().showErrorToast(e.toString());
+    }
+  }
+
+  addFavorite(ProductModel productModel) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Products")
+          .doc(productModel.uid)
+          .update({
+        "favorite": FieldValue.arrayUnion(
+          [FirebaseAuth.instance.currentUser!.uid],
+        ),
+      }).then((value) async {
+        await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Favorites")
+            .doc(productModel.uid)
+            .set(
+          {
+            "uid": productModel.uid,
+          },
+        );
+        OurToast().showSuccessToast("Added to favorite list");
+      });
+    } catch (e) {
+      OurToast().showErrorToast(e.toString());
+    }
+  }
+
+  removeFavorite(ProductModel productModel) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("Products")
+          .doc(productModel.uid)
+          .update({
+        "favorite": FieldValue.arrayRemove(
+          [FirebaseAuth.instance.currentUser!.uid],
+        ),
+      }).then((value) async {
+        await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection("Favorites")
+            .doc(productModel.uid)
+            .delete();
+        OurToast().showErrorToast("Removed from favotite list");
       });
     } catch (e) {
       OurToast().showErrorToast(e.toString());

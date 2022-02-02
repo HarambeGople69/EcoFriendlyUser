@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/controller/dashboard_controller.dart';
 import 'package:myapp/screen/dashboard_screens/add_product_screen/add_product_screens.dart';
-import 'package:myapp/screen/dashboard_screens/chat_screens/chat_screen.dart';
+import 'package:myapp/screen/dashboard_screens/favorite_screen/favorite_screen.dart';
 import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
 import 'package:myapp/screen/dashboard_screens/order_screens/order_screen.dart';
 
@@ -31,7 +31,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   List screens = [
     const HomeScreen(),
-    const ChatScreen(),
+    const FavoriteScreen(),
     const OrderScreen(),
     const AddProductScreen()
   ];
@@ -53,8 +53,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 activeColor: Colors.red,
               ),
               BottomNavyBarItem(
-                  icon: const Icon(Icons.people),
-                  title: const Text('Users'),
+                  icon: const Icon(Icons.favorite_border_outlined),
+                  title: const Text('Favorite'),
                   activeColor: Colors.purpleAccent),
               BottomNavyBarItem(
                   icon: const Icon(Icons.message),

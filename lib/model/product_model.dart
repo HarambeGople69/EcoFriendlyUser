@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductModel {
@@ -14,8 +12,10 @@ class ProductModel {
   final List ratingUID;
   final int ratingNo;
   final List searchfrom;
+  final List favorite;
 
   ProductModel({
+    required this.favorite,
     required this.searchfrom,
     required this.ratingNo,
     required this.uid,
@@ -41,6 +41,7 @@ class ProductModel {
       'timestamp': timestamp,
       'ratingUID': ratingUID,
       'ratingNo': ratingNo,
+      'favorite': favorite,
     };
   }
 
@@ -57,6 +58,7 @@ class ProductModel {
       ratingUID: map['ratingUID'] ?? [],
       ratingNo: map['ratingNo'],
       searchfrom: map['searchfrom'] ?? [],
+      favorite: map['favorite'] ?? [],
     );
   }
 }
