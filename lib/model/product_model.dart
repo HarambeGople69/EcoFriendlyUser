@@ -13,8 +13,10 @@ class ProductModel {
   final Timestamp timestamp;
   final List ratingUID;
   final int ratingNo;
+  final List searchfrom;
 
   ProductModel({
+    required this.searchfrom,
     required this.ratingNo,
     required this.uid,
     required this.name,
@@ -54,6 +56,7 @@ class ProductModel {
       timestamp: map['timestamp'] ?? '',
       ratingUID: map['ratingUID'] ?? [],
       ratingNo: map['ratingNo'],
+      searchfrom: map['searchfrom'] ?? [],
     );
   }
 }

@@ -47,6 +47,12 @@ class Firestore {
   }
 
   addProduct(String name, String desc, double price, String url) async {
+    List<String> searchList = [];
+    for (int i = 0; i <= name.length; i++) {
+      searchList.add(
+        name.substring(0, i).toLowerCase(),
+      );
+    }
     String uid = const Uuid().v4();
     try {
       await FirebaseFirestore.instance.collection("Products").doc(uid).set({
@@ -62,6 +68,7 @@ class Firestore {
         "ratingUID": [],
         "ratingNo": 0,
         "timestamp": Timestamp.now(),
+        "searchfrom": searchList,
       }).then((value) {
         OurToast().showSuccessToast("Product added");
       });

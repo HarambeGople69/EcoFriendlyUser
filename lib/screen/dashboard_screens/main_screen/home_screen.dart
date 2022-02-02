@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:myapp/controller/search_text_controller.dart';
 import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/model/product_model.dart';
 import 'package:myapp/screen/dashboard_screens/cart_screen/cart_screen.dart';
@@ -11,6 +13,7 @@ import 'package:myapp/screen/dashboard_screens/product_detail_screen/our_detail_
 import 'package:myapp/utils/colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:myapp/widgets/our_product_item_tile.dart';
 import 'package:myapp/widgets/our_shimmer_text.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
@@ -35,15 +38,29 @@ class _HomeScreenState extends State<HomeScreen> {
     "assets/images/7.png",
     "assets/images/8.png",
   ];
-
+  String searchText = "";
+  TextEditingController _search_controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const Drawer(),
       appBar: AppBar(
         backgroundColor: logoColor,
-        title: const Text(
+        title: Text(
           "Eco-Friendly Paper Bag",
+          style: TextStyle(
+            fontSize: ScreenUtil().setSp(25),
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(
+              ScreenUtil().setSp(20),
+            ),
+            bottomLeft: Radius.circular(
+              ScreenUtil().setSp(20),
+            ),
+          ),
         ),
         actions: [
           Padding(
@@ -128,6 +145,63 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           )
         ],
+        bottom: PreferredSize(
+          child: Obx(
+            () => Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: ScreenUtil().setSp(20),
+                vertical: ScreenUtil().setSp(10),
+              ),
+              height: ScreenUtil().setSp(45),
+              child: TextField(
+                onChanged: (value) {
+                  Get.find<SearchTextController>().changeValue(value);
+                },
+                style: TextStyle(
+                  color: logoColor,
+                  fontSize: ScreenUtil().setSp(17.5),
+                ),
+                controller:
+                    Get.find<SearchTextController>().search_controller.value,
+                decoration: InputDecoration(
+                  focusColor: logoColor,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(
+                        ScreenUtil().setSp(10),
+                      ),
+                    ),
+                  ),
+                  fillColor: Colors.white,
+                  filled: true,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: ScreenUtil().setSp(25),
+                    color: logoColor,
+                  ),
+                  suffixIcon: Get.find<SearchTextController>()
+                          .searchText
+                          .trim()
+                          .isEmpty
+                      ? Icon(null)
+                      : InkWell(
+                          onTap: () {
+                            Get.find<SearchTextController>().clearController();
+                          },
+                          child: Icon(
+                            Icons.delete,
+                            size: ScreenUtil().setSp(25),
+                            color: logoColor,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+          preferredSize: Size.fromHeight(
+            ScreenUtil().setSp(75),
+          ),
+        ),
       ),
       body: SafeArea(
         child: Container(
@@ -189,189 +263,97 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: "Products",
                 ),
                 const OurSizedBox(),
-                StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection("Products")
-                        .orderBy("timestamp", descending: true)
-                        .snapshots(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot.hasData) {
-                        if (snapshot.data!.docs.length > 0) {
-                          return StaggeredGridView.countBuilder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisCount: 4,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              ProductModel productModel = ProductModel.fromMap(
-                                  snapshot.data!.docs[index]);
-                              return InkWell(
-                                onTap: () {
-                                  Get.to(
-                                      OurDetailProductScreen(
-                                        productModelUID: productModel,
-                                      ),
-                                      transition: Transition.rightToLeft);
+                Obx(() => Get.find<SearchTextController>()
+                        .searchText
+                        .trim()
+                        .isEmpty
+                    ? StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection("Products")
+                            .orderBy("timestamp", descending: true)
+                            .snapshots(),
+                        builder:
+                            (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasData) {
+                            if (snapshot.data!.docs.length > 0) {
+                              return StaggeredGridView.countBuilder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                crossAxisCount: 4,
+                                itemCount: snapshot.data!.docs.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  ProductModel productModel =
+                                      ProductModel.fromMap(
+                                          snapshot.data!.docs[index]);
+                                  return OurProductItemTile(
+                                    productModel: productModel,
+                                  );
                                 },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: ScreenUtil().setSp(10),
-                                    vertical: ScreenUtil().setSp(5),
-                                  ),
-                                  color: logoColor.withOpacity(0.3),
-                                  child: Stack(
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Center(
-                                            child: CachedNetworkImage(
-                                              height: ScreenUtil().setSp(150),
-                                              width: ScreenUtil().setSp(150),
-                                              fit: BoxFit.fitWidth,
-                                              imageUrl: productModel.url,
-                                              placeholder: (context, url) =>
-                                                  Image.asset(
-                                                "assets/images/placeholder.png",
-                                                height: ScreenUtil().setSp(150),
-                                                width: ScreenUtil().setSp(150),
-                                              ),
-                                            ),
-                                          ),
-                                          const OurSizedBox(),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                "Name:",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      ScreenUtil().setSp(17.5),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: ScreenUtil().setSp(
-                                                  15,
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  productModel.name,
-                                                  style: TextStyle(
-                                                    fontSize:
-                                                        ScreenUtil().setSp(15),
-                                                  ),
-                                                  softWrap: true,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          const OurSizedBox(),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                "Price:",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize:
-                                                      ScreenUtil().setSp(17.5),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: ScreenUtil().setSp(
-                                                  15,
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  productModel.price.toString(),
-                                                  softWrap: true,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          const Spacer(),
-                                          Center(
-                                            child: RatingStars(
-                                              value: productModel.rating
-                                                  .toDouble(),
-                                              starBuilder: (index, color) =>
-                                                  Icon(
-                                                Icons.star,
-                                                color: color,
-                                                size: ScreenUtil().setSp(17),
-                                              ),
-                                              starCount: 5,
-                                              starSize: ScreenUtil().setSp(17),
-                                              valueLabelColor:
-                                                  const Color(0xff9b9b9b),
-                                              valueLabelTextStyle: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w400,
-                                                fontStyle: FontStyle.normal,
-                                                fontSize:
-                                                    ScreenUtil().setSp(12),
-                                              ),
-                                              valueLabelRadius:
-                                                  ScreenUtil().setSp(20),
-                                              maxValue: 5,
-                                              starSpacing: 1,
-                                              maxValueVisibility: true,
-                                              valueLabelVisibility: true,
-                                              animationDuration: const Duration(
-                                                  milliseconds: 1000),
-                                              valueLabelPadding:
-                                                  EdgeInsets.symmetric(
-                                                vertical: ScreenUtil().setSp(5),
-                                                horizontal:
-                                                    ScreenUtil().setSp(5),
-                                              ),
-                                              valueLabelMargin: EdgeInsets.only(
-                                                right: ScreenUtil().setSp(3),
-                                              ),
-                                              starOffColor:
-                                                  const Color(0xffe7e8ea),
-                                              starColor: Colors.yellow,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                                staggeredTileBuilder: (int index) =>
+                                    StaggeredTile.count(
+                                        2, index.isEven ? 3.35 : 3.5),
+                                mainAxisSpacing: ScreenUtil().setSp(10),
+                                crossAxisSpacing: ScreenUtil().setSp(10),
+                              );
+                            } else {
+                              return Text("No Data");
+                            }
+                          } else if (!snapshot.hasData) {
+                            return Text("No Datasaiii");
+                          }
+                          return Text("data");
+
+                          // return CircularProgressIndicator();
+                          // rethrow
+                        },
+                      )
+                    : StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection("Products")
+                            .where("searchfrom",
+                                arrayContains: Get.find<SearchTextController>()
+                                    .search_controller
+                                    .value
+                                    .text
+                                    .toLowerCase())
+                            .snapshots(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                          if (snapshot.hasData) {
+                            if (snapshot.data!.docs.length > 0) {
+                              return StaggeredGridView.countBuilder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                crossAxisCount: 4,
+                                itemCount: snapshot.data!.docs.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  ProductModel productModel =
+                                      ProductModel.fromMap(
+                                          snapshot.data!.docs[index]);
+                                  return OurProductItemTile(
+                                    productModel: productModel,
+                                  );
+                                },
+                                staggeredTileBuilder: (int index) =>
+                                    StaggeredTile.count(
+                                        2, index.isEven ? 3.35 : 3.5),
+                                mainAxisSpacing: ScreenUtil().setSp(10),
+                                crossAxisSpacing: ScreenUtil().setSp(10),
+                              );
+                            } else {
+                              return Center(
+                                child: Text(
+                                  "No Users",
                                 ),
                               );
-                            },
-                            staggeredTileBuilder: (int index) =>
-                                StaggeredTile.count(2, index.isEven ? 3 : 3.5),
-                            mainAxisSpacing: ScreenUtil().setSp(10),
-                            crossAxisSpacing: ScreenUtil().setSp(10),
-                          );
-                        } else {
-                          return Text("No Data");
-                        }
-                      } else if (!snapshot.hasData) {
-                        return Text("No Datasaiii");
-                      }
-                      return Text("data");
-
-                      // return CircularProgressIndicator();
-                      // rethrow
-                    })
+                            }
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        }))
               ],
             ),
           ),
