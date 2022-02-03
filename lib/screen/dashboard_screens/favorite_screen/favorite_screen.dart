@@ -40,6 +40,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 .collection("Users")
                 .doc(FirebaseAuth.instance.currentUser!.uid)
                 .collection("Favorites")
+                .orderBy("timestamp", descending: true)
                 .snapshots(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {

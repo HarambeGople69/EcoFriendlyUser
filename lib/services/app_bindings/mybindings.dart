@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:myapp/controller/authentication_controller.dart';
 import 'package:myapp/controller/dashboard_controller.dart';
+import 'package:myapp/controller/order_cart_controller.dart';
 import 'package:myapp/controller/search_text_controller.dart';
 
 class MyBinding implements Bindings {
@@ -15,6 +16,9 @@ class MyBinding implements Bindings {
     );
     Get.lazyPut(
       () => SearchTextController(),
+    );
+    Get.lazyPut(
+      () => OrderCartController(),
     );
   }
 }

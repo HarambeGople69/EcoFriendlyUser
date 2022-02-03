@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:myapp/controller/order_cart_controller.dart';
 import 'package:myapp/model/cart_product_model.dart';
 import 'package:myapp/model/firebase_user_model.dart';
 import 'package:myapp/screen/dashboard_screens/check_out_screen/check_out_screen.dart';
@@ -302,6 +303,7 @@ class _CartScreenState extends State<CartScreen> {
                 title: "Clear Cart",
                 function: () async {
                   await Firestore().clearCart();
+                  // print(Get.find<OrderCartController>().orderCart);
                 },
               ),
             ),
@@ -312,6 +314,7 @@ class _CartScreenState extends State<CartScreen> {
               child: OurElevatedButton(
                 title: "Check Out",
                 function: () async {
+                  // await Firestore().orderProductDetail();
                   var abc = await FirebaseFirestore.instance
                       .collection("Users")
                       .doc(FirebaseAuth.instance.currentUser!.uid)

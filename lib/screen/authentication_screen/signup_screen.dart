@@ -61,7 +61,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     print("Inside send OTP screen");
     Get.find<AuthenticationController>().toggle(true);
 
-    EmailAuth emailAuth = EmailAuth(sessionName: "Sample session");
+    EmailAuth emailAuth = EmailAuth(sessionName: "Eco-Friendly Paper bag");
     bool result = await emailAuth.sendOtp(
         recipientMail: _email_controller.value.text, otpLength: 5);
     if (result) {

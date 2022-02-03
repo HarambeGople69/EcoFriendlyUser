@@ -4,9 +4,11 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/controller/authentication_controller.dart';
+import 'package:myapp/controller/order_cart_controller.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/model/cart_product_model.dart';
 import 'package:myapp/model/firebase_user_model.dart';
+import 'package:myapp/model/order_product_detail.dart';
 import 'package:myapp/model/product_model.dart';
 import 'package:myapp/model/user_model.dart';
 import 'package:myapp/screen/dashboard_screens/dashboard_screen.dart';
@@ -179,6 +181,7 @@ class Firestore {
           "addedOn": Timestamp.now(),
           "quantity": 1,
         });
+
         OurToast().showSuccessToast("Product Added to cart");
       });
     } catch (e) {
@@ -210,12 +213,12 @@ class Firestore {
           "currentCartPrice": firebaseUserModel.currentCartPrice -
               cartProductModel.price * cartProductModel.quantity,
         });
-        await FirebaseFirestore.instance
-            .collection("Carts")
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .collection("Products")
-            .doc(product.uid)
-            .delete();
+        // await FirebaseFirestore.instance
+        //     .collection("Carts")
+        //     .doc(FirebaseAuth.instance.currentUser!.uid)
+        //     .collection("Products")
+        //     .doc(product.uid)
+        //     .delete();
 
         OurToast().showSuccessToast("Product removed from cart");
       });
@@ -342,6 +345,7 @@ class Firestore {
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection("Products")
             .get();
+        // .delete();
 
         for (var doc in collection.docs) {
           // FirebaseFirestore.instance.batch().delete(doc.reference);
@@ -355,6 +359,10 @@ class Firestore {
             .update({
           "currentCartPrice": 0.0,
         });
+        await FirebaseFirestore.instance
+            .collection("Carts")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .delete();
         OurToast().showSuccessToast("Product removed from cart");
       });
     } catch (e) {
@@ -378,9 +386,7 @@ class Firestore {
             .collection("Favorites")
             .doc(productModel.uid)
             .set(
-          {
-            "uid": productModel.uid,
-          },
+          {"uid": productModel.uid, "timestamp": Timestamp.now()},
         );
         OurToast().showSuccessToast("Added to favorite list");
       });
@@ -410,5 +416,103 @@ class Firestore {
     } catch (e) {
       OurToast().showErrorToast(e.toString());
     }
+  }
+
+  placeOrder(
+    String name,
+    String phone,
+    String email,
+    String? country,
+    String? postalCode,
+    String? adminArea,
+    String? subAdminArea,
+    String? locality,
+    String? subLocality,
+    double longitude,
+    double latitude,
+  ) async {
+    String orderUID = Uuid().v4();
+    String verifyUID = Uuid().v4().substring(0, 6);
+    var collection = await FirebaseFirestore.instance
+        .collection("Carts")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("Products")
+        .get();
+
+    var data = await FirebaseFirestore.instance
+        .collection("Users")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+
+    var price = data.data()!["currentCartPrice"];
+
+    for (var doc in collection.docs) {
+      var abc = doc.data();
+      OrderProductDetail orderProductDetail = OrderProductDetail(
+          name: abc["name"],
+          url: abc["url"],
+          price: abc["price"],
+          quantity: abc["quantity"]);
+      Get.find<OrderCartController>().addToCart(orderProductDetail);
+    }
+    await FirebaseFirestore.instance
+        .collection("Users")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection("MyOrders")
+        .doc(orderUID)
+        .set({
+      "orderUID": orderUID,
+      "ownerUID": FirebaseAuth.instance.currentUser!.uid,
+      "name": name,
+      "phone": phone,
+      "email": email,
+      "country": country ?? "",
+      "postalCode": postalCode ?? "",
+      "adminArea": adminArea ?? "",
+      "subAdminArea": subAdminArea ?? "",
+      "locality": locality ?? "",
+      "subLocality": subLocality ?? "",
+      "longitude": longitude,
+      "latitude": latitude,
+      "verifyUID": verifyUID,
+      "riderUID": "",
+      "riderName": "",
+      "riderPhone": "",
+      "orderState": "processing",
+      "items": Get.find<OrderCartController>().orderCart,
+      "price": price,
+      "timestamp": Timestamp.now()
+    });
+    await FirebaseFirestore.instance
+        .collection("Orders")
+        .doc(orderUID)
+        .collection("Processing")
+        .doc(orderUID)
+        .set({
+      "orderUID": orderUID,
+      "ownerUID": FirebaseAuth.instance.currentUser!.uid,
+      "name": name,
+      "phone": phone,
+      "email": email,
+      "country": country ?? "",
+      "postalCode": postalCode ?? "",
+      "adminArea": adminArea ?? "",
+      "subAdminArea": subAdminArea ?? "",
+      "locality": locality ?? "",
+      "subLocality": subLocality ?? "",
+      "longitude": longitude,
+      "latitude": latitude,
+      "verifyUID": verifyUID,
+      "riderUID": "",
+      "riderName": "",
+      "riderPhone": "",
+      "orderState": "processing",
+      "items": Get.find<OrderCartController>().orderCart,
+      "price": price,
+      "timestamp": Timestamp.now()
+    });
+    clearCart();
+    Get.off(DashBoardScreen());
+    OurToast().showSuccessToast("Order placed successfully.");
   }
 }
