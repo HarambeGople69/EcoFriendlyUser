@@ -1,3 +1,4 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +16,7 @@ import 'package:myapp/widgets/our_elevated_button.dart';
 import 'package:myapp/widgets/our_flutter_toast.dart';
 import 'package:myapp/widgets/our_shimmer_text.dart';
 import 'package:myapp/widgets/our_sized_box.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class CartScreen extends StatefulWidget {
@@ -323,16 +325,31 @@ class _CartScreenState extends State<CartScreen> {
                   if (def == 0) {
                     OurToast().showErrorToast("Oops, cart is empty");
                   } else {
-                    Position newPosition = await Geolocator.getCurrentPosition(
-                        desiredAccuracy: LocationAccuracy.high);
-                    Get.to(
-                      CheckOutScreen(
-                        userPosition: newPosition,
-                      ),
-                      // LocationAppExample(),
-                      transition: Transition.rightToLeft,
-                    );
-                    OurToast().showSuccessToast("Cart has Item");
+                    PermissionStatus _status =
+                        await Permission.location.request();
+
+                    if (_status.isPermanentlyDenied) {
+                      AppSettings.openAppSettings();
+                    }
+                    if (!_status.isGranted) {
+                      await Permission.location.request();
+                    } else {
+                      try {
+                        Position newPosition =
+                            await Geolocator.getCurrentPosition(
+                                desiredAccuracy: LocationAccuracy.high);
+                        Get.to(
+                          CheckOutScreen(
+                            userPosition: newPosition,
+                          ),
+                          // LocationAppExample(),
+                          transition: Transition.rightToLeft,
+                        );
+                        OurToast().showSuccessToast("Cart has Item");
+                      } catch (e) {
+                        print(e.toString());
+                      }
+                    }
                   }
                 },
               ),

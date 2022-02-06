@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: logoColor,
         title: Text(
-          "Eco-Friendly Paper Bag",
+          "FMC Cart",
           style: TextStyle(
             fontSize: ScreenUtil().setSp(25),
           ),

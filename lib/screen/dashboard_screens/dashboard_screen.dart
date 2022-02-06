@@ -57,8 +57,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   title: const Text('Favorite'),
                   activeColor: Colors.purpleAccent),
               BottomNavyBarItem(
-                  icon: const Icon(Icons.message),
-                  title: const Text('Messages'),
+                  icon: const Icon(Icons.shopping_bag),
+                  title: const Text('Orders'),
                   activeColor: Colors.pink),
               BottomNavyBarItem(
                   icon: const Icon(Icons.settings),

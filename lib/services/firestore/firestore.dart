@@ -481,14 +481,10 @@ class Firestore {
       "orderState": "processing",
       "items": Get.find<OrderCartController>().orderCart,
       "price": price,
+      "orderPlaced": DateTime.now(),
       "timestamp": Timestamp.now()
     });
-    await FirebaseFirestore.instance
-        .collection("Orders")
-        .doc(orderUID)
-        .collection("Processing")
-        .doc(orderUID)
-        .set({
+    await FirebaseFirestore.instance.collection("Orders").doc(orderUID).set({
       "orderUID": orderUID,
       "ownerUID": FirebaseAuth.instance.currentUser!.uid,
       "name": name,
@@ -509,9 +505,11 @@ class Firestore {
       "orderState": "processing",
       "items": Get.find<OrderCartController>().orderCart,
       "price": price,
+      "orderPlaced": DateTime.now(),
       "timestamp": Timestamp.now()
     });
     clearCart();
+    Get.find<OrderCartController>().clearCart();
     Get.off(DashBoardScreen());
     OurToast().showSuccessToast("Order placed successfully.");
   }

@@ -14,7 +14,7 @@ class OurShimmerText extends StatelessWidget {
       highlightColor: logoColor,
       child: Text(
         title,
-        textAlign: TextAlign.center,
+        // textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: ScreenUtil().setSp(27),
           fontWeight: FontWeight.bold,

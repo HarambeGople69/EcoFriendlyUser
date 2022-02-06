@@ -73,7 +73,7 @@ class _OurProductItemTileState extends State<OurProductItemTile> {
                   child: CachedNetworkImage(
                     height: ScreenUtil().setSp(150),
                     width: double.infinity,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     imageUrl: widget.productModel.url,
                     placeholder: (context, url) => Image.asset(
                       "assets/images/placeholder.png",

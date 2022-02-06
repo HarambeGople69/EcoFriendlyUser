@@ -33,5 +33,5 @@ class OrderProductDetail {
 
   String toJson() => json.encode(toMap());
 
-  factory OrderProductDetail.fromJson(String source) => OrderProductDetail.fromMap(json.decode(source));
+  // factory OrderProductDetail.fromJson(String source) => OrderProductDetail.fromMap(json.decode(source));
 }

@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
             width: MediaQuery.of(context).size.width,
           ),
           const OurShimmerText(
-            title: "Eco-Friendly Paper Bag",
+            title: "FMC",
           ),
           const OurSizedBox(),
           const OurSizedBox(),
