@@ -1,11 +1,11 @@
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:myapp/controller/dashboard_controller.dart';
-import 'package:myapp/screen/dashboard_screens/add_product_screen/add_product_screens.dart';
-import 'package:myapp/screen/dashboard_screens/favorite_screen/favorite_screen.dart';
 import 'package:myapp/screen/dashboard_screens/main_screen/home_screen.dart';
-import 'package:myapp/screen/dashboard_screens/order_screens/order_screen.dart';
+import 'package:myapp/screen/dashboard_screens/main_screen/search_screen.dart';
+import 'package:myapp/screen/dashboard_screens/main_screen/setting_screen.dart';
 
 class DashBoardScreen extends StatefulWidget {
   const DashBoardScreen({Key? key}) : super(key: key);
@@ -30,10 +30,17 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   }
 
   List screens = [
-    const HomeScreen(),
-    const FavoriteScreen(),
-    const OrderScreen(),
-    const AddProductScreen()
+    HomeScreen(),
+    // const FavoriteScreen(),
+    // const OrderScreen(),
+    SearchPage(),
+    Center(
+      child: Text(
+        "Order Screen",
+      ),
+    ),
+    SettingScreen(),
+    // const AddProductScreen()
   ];
 
   @override
@@ -48,21 +55,53 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 Get.find<DashboardController>().changeIndexs(index),
             items: [
               BottomNavyBarItem(
-                icon: const Icon(Icons.apps),
-                title: const Text('Home'),
+                icon: Icon(
+                  Icons.apps,
+                  size: ScreenUtil().setSp(25),
+                ),
+                title: Text(
+                  'Home',
+                  style: TextStyle(
+                    fontSize: ScreenUtil().setSp(17.5),
+                  ),
+                ),
                 activeColor: Colors.red,
               ),
               BottomNavyBarItem(
-                  icon: const Icon(Icons.favorite_border_outlined),
-                  title: const Text('Favorite'),
+                  icon: Icon(
+                    Icons.search,
+                    size: ScreenUtil().setSp(25),
+                  ),
+                  title: Text(
+                    'Search',
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(17.5),
+                    ),
+                  ),
                   activeColor: Colors.purpleAccent),
               BottomNavyBarItem(
-                  icon: const Icon(Icons.shopping_bag),
-                  title: const Text('Orders'),
+                  icon: Icon(
+                    Icons.shopping_bag,
+                    size: ScreenUtil().setSp(25),
+                  ),
+                  title: Text(
+                    'Orders',
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(17.5),
+                    ),
+                  ),
                   activeColor: Colors.pink),
               BottomNavyBarItem(
-                  icon: const Icon(Icons.settings),
-                  title: const Text('Settings'),
+                  icon: Icon(
+                    Icons.settings,
+                    size: ScreenUtil().setSp(25),
+                  ),
+                  title: Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: ScreenUtil().setSp(17.5),
+                    ),
+                  ),
                   activeColor: Colors.blue),
             ],
           ));

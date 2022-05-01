@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:myapp/apis/api_services.dart';
 import 'package:myapp/controller/authentication_controller.dart';
+import 'package:myapp/model/signup_request.dart';
 import 'package:myapp/model/user_model.dart';
 import 'package:myapp/screen/authentication_screen/login_screen.dart';
 import 'package:myapp/screen/authentication_screen/verification_otp_screen.dart';
@@ -34,12 +37,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController _phone_controller = TextEditingController();
   TextEditingController _email_controller = TextEditingController();
   TextEditingController _password_controller = TextEditingController();
-  TextEditingController _location_controller = TextEditingController();
+  TextEditingController _username_controller = TextEditingController();
 
   final _name_node = FocusNode();
   final _phone_node = FocusNode();
   final _email_node = FocusNode();
   final _password_node = FocusNode();
+  final _username_node = FocusNode();
 
   pickImage() async {
     try {
@@ -54,28 +58,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     } catch (e) {
       print("$e =========");
-    }
-  }
-
-  sendOTP(UserModel usermodel) async {
-    print("Inside send OTP screen");
-    Get.find<AuthenticationController>().toggle(true);
-
-    EmailAuth emailAuth = EmailAuth(sessionName: "Eco-Friendly Paper bag");
-    bool result = await emailAuth.sendOtp(
-        recipientMail: _email_controller.value.text, otpLength: 5);
-    if (result) {
-      OurToast().showSuccessToast("OTP Sent");
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return VerificationOtpScreen(
-          usermodel: usermodel,
-          file: file!,
-        );
-      }));
-      Get.find<AuthenticationController>().toggle(false);
-    } else {
-      OurToast().showSuccessToast("Oops, OTP sending failed");
-      Get.find<AuthenticationController>().toggle(false);
     }
   }
 
@@ -108,29 +90,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: SingleChildScrollView(
                       child: Column(
                     children: [
-                      InkWell(
-                        onTap: () {
-                          pickImage();
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            ScreenUtil().setSp(20),
-                          ),
-                          child: Container(
-                            child: file == null
-                                ? Image.asset(
-                                    "assets/images/user_icon.png",
-                                    height: ScreenUtil().setSp(200),
-                                    width: ScreenUtil().setSp(200),
-                                  )
-                                : Image.file(
-                                    file!,
-                                    height: ScreenUtil().setSp(200),
-                                    width: ScreenUtil().setSp(200),
-                                    fit: BoxFit.fitWidth,
-                                  ),
-                          ),
-                        ),
+                      Image.asset(
+                        "assets/images/logo.png",
+                        fit: BoxFit.fitHeight,
+                        height: ScreenUtil().setSp(300),
+                        width: MediaQuery.of(context).size.width,
                       ),
                       const OurSizedBox(),
                       CustomTextField(
@@ -139,7 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         icon: Icons.person,
                         controller: _name_controller,
                         validator: (value) {},
-                        title: "Name",
+                        title: "Full Name",
                         type: TextInputType.name,
                         number: 0,
                       ),
@@ -166,60 +130,42 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const OurSizedBox(),
                       CustomTextField(
                         start: _phone_node,
+                        end: _username_node,
                         icon: Icons.phone,
                         controller: _phone_controller,
                         validator: (value) {},
                         title: "Phone",
                         type: TextInputType.number,
-                        number: 1,
+                        number: 0,
                       ),
                       const OurSizedBox(),
                       CustomTextField(
-                          // length: 5,
-                          icon: Icons.location_on,
-                          // readonly: true,
-                          type: TextInputType.name,
-                          controller: _location_controller,
-                          title: "Location",
-                          validator: (value) {},
-                          number: 1),
+                        start: _username_node,
+                        controller: _username_controller,
+                        validator: (value) {},
+                        title: "User Name",
+                        type: TextInputType.text,
+                        number: 1,
+                      ),
                       const OurSizedBox(),
                       OurElevatedButton(
-                        title: "Get my current location",
+                        title: "Sign Up",
                         function: () async {
                           Get.find<AuthenticationController>().toggle(true);
-                          String? location =
-                              await GetCurrentLocation().getCurrentLocation();
-                          setState(() {
-                            _location_controller.text = location!;
-                            print("===============");
-                            print(_location_controller.text);
-                          });
+                          SignUpRequestModel signUpRequestModel =
+                              SignUpRequestModel(
+                            full_name: _name_controller.text.trim(),
+                            email_address: _email_controller.text.trim(),
+                            mobile_no: _phone_controller.text.trim(),
+                            username: _username_controller.text.trim(),
+                            password: _password_controller.text.trim(),
+                          );
+                          print(
+                            signUpRequestModel.toJson(),
+                          );
+                          await APIService()
+                              .signUp(signUpRequestModel.toJson(), context);
                           Get.find<AuthenticationController>().toggle(false);
-                        },
-                      ),
-                      OurSizedBox(),
-                      OurElevatedButton(
-                        title: "Send OTP to email",
-                        function: () {
-                          if (file == null) {
-                            OurToast().showErrorToast("Select profile image");
-                          } else if (_name_controller.text.trim().isEmpty ||
-                              _phone_controller.text.trim().isEmpty ||
-                              _email_controller.text.trim().isEmpty ||
-                              _password_controller.text.trim().isEmpty ||
-                              _location_controller.text.trim().isEmpty) {
-                            OurToast().showErrorToast("Fields can't be empty");
-                          } else {
-                            UserModel userModel = UserModel(
-                              name: _name_controller.text.trim(),
-                              email: _email_controller.text.trim(),
-                              password: _password_controller.text.trim(),
-                              phone: _phone_controller.text.trim(),
-                              location: _location_controller.text.trim(),
-                            );
-                            sendOTP(userModel);
-                          }
                         },
                       ),
                     ],

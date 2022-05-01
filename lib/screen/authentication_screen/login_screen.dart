@@ -1,14 +1,13 @@
-
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:myapp/apis/api_services.dart';
 import 'package:myapp/controller/authentication_controller.dart';
+import 'package:myapp/model/login_response_model.dart';
 import 'package:myapp/screen/authentication_screen/signup_screen.dart';
-import 'package:myapp/services/authentication/authentication.dart';
 import 'package:myapp/utils/colors.dart';
 import 'package:myapp/widgets/our_elevated_button.dart';
 import 'package:myapp/widgets/our_flutter_toast.dart';
@@ -25,6 +24,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // ignore: non_constant_identifier_names
   TextEditingController _email_controller = TextEditingController();
   TextEditingController _password_controller = TextEditingController();
   final _email_node = FocusNode();
@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: MediaQuery.of(context).size.width * 0.45,
                           child: OurElevatedButton(
                             title: "Login",
-                            function: () {
+                            function: () async {
                               if (_email_controller.text.trim().isEmpty ||
                                   _password_controller.text.trim().isEmpty) {
                                 OurToast()
@@ -101,10 +101,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               } else {
                                 Get.find<AuthenticationController>()
                                     .toggle(true);
-
-                                Auth().loginAccount(
-                                    _email_controller.text.trim(),
-                                    _password_controller.text.trim());
+                                await APIService().login({
+                                  "username": _email_controller.text.trim(),
+                                  "password": _password_controller.text.trim(),
+                                }, context);
+                                Get.find<AuthenticationController>()
+                                    .toggle(false);
                               }
                             },
                           ),
